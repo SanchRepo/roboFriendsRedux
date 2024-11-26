@@ -1,44 +1,50 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import CardList from '../components/CardList';
-import SearchBar from "../components/SearchBar";
+import CardList from "../components/CardList";
 import Scroll from "../components/Scroll";
+import SearchBar from "../components/SearchBar";
+
 import ErrorBoundary from "../components/ErrorBoundary"
 import './App.css';
 
-import {setSearchField} from '../actions'
+import {setSearchField, requestRobots} from '../actions'
 
 
 const mapStateToProps = state => {
 	return {
-		searchField: state.searchField
+		searchField: state.searchRobots.searchField,
+		robots: state.reduceRobots.robots,
+		isPending: state.reduceRobots.isPending,
+		error: state.reduceRobots.error
 	}
 }
 
 const mapDispatchToProps = (dispatch) => {
 	return {
-		onChangeSearch: (event) => dispatch(setSearchField(event.target.value))
+		onChangeSearch: (event) => dispatch(setSearchField(event.target.value)),
+		onRequestRobots: () => dispatch(requestRobots())
 	}
 
 }
 
 
 class App extends React.Component {
-	constructor() {
-		super();
-		this.state = {
-			robots: []
-			//searchfield : ''
-		}
+	// constructor() {
+	// 	super();
+	// 	this.state = {
+	// 		robots: []
+	// 		//searchfield : ''
+	// 	}
 
-	}
+	// }
 
 	componentDidMount() {
-		fetch('https://jsonplaceholder.typicode.com/users')
-			.then(response => response.json())
-			.then(users => this.setState({robots:users}))
-
+	// 	fetch('https://jsonplaceholder.typicode.com/users')
+	// 		.then(response => response.json())
+	// 		.then(users => this.setState({robots:users}))
+		this.props.onRequestRobots();
 	}
+
 
 	// onChangeSearch = (event) => {
 	// 	this.setState({searchfield: event.target.value})
@@ -49,8 +55,8 @@ class App extends React.Component {
 
 	render() {
 		//const {robots, searchfield} = this.state;
-		const {robots} = this.state;
-		const {searchField, onChangeSearch} = this.props;
+		//const {robots} = this.state;
+		const {searchField, onChangeSearch, robots, isPending} = this.props;
 		const filteredBots = robots.filter(robot => {
 			return robot.name.toLowerCase()
 			.includes(searchField.toLowerCase())
@@ -59,7 +65,7 @@ class App extends React.Component {
 
 		})
 
-		if (!robots.length) {
+		if (isPending) {
 			return <h1 className="tc">Loading...</h1>;
 		} else {
 
